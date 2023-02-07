@@ -46,6 +46,7 @@ class Ui_MainWindow(object):
         self.label_4.setObjectName("label_4")
         self.horizontalLayout.addWidget(self.label_4)
         self.horizontalSlider = QtWidgets.QSlider(self.centralwidget)
+        self.horizontalSlider.setMaximum(50)
         self.horizontalSlider.setProperty("value", 50)
         self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
         self.horizontalSlider.setObjectName("horizontalSlider")

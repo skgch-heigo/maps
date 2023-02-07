@@ -61,6 +61,8 @@ class Example(QMainWindow, window.Ui_MainWindow):
                                   str(self.horizontalSlider.value() / 100))
         self.img = ImageQt.ImageQt(Image.open(BytesIO(response.content)))
         self.label.setPixmap(QPixmap.fromImage(self.img))
+        if not self.hasFocus():
+            self.setFocus()
 
     def initUI(self):
         self.doubleSpinBox.valueChanged.connect(self.getImage)
@@ -70,15 +72,32 @@ class Example(QMainWindow, window.Ui_MainWindow):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_PageUp:
-            self.horizontalSlider.value = min(99, self.horizontalSlider.value + 10)
+            self.horizontalSlider.setValue(min(99, self.horizontalSlider.value() + 5))
             self.getImage()
         if event.key() == Qt.Key_PageDown:
-            self.horizontalSlider.value = max(1, self.horizontalSlider.value - 10)
+            self.horizontalSlider.setValue(max(1, self.horizontalSlider.value() - 5))
             self.getImage()
+        if event.key() == Qt.Key_Down:
+            self.doubleSpinBox_2.setValue(max(-90, self.doubleSpinBox_2.value() - 1))
+            self.getImage()
+        if event.key() == Qt.Key_Up:
+            self.doubleSpinBox_2.setValue(min(90, self.doubleSpinBox_2.value() + 1))
+            self.getImage()
+        if event.key() == Qt.Key_Right:
+            self.doubleSpinBox.setValue(min(180, self.doubleSpinBox.value() + 1))
+            self.getImage()
+        if event.key() == Qt.Key_Left:
+            self.doubleSpinBox.setValue(max(-180, self.doubleSpinBox.value() - 1))
+            self.getImage()
+
+
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = Example()
     ex.show()
+    sys.excepthook = except_hook
     sys.exit(app.exec())
