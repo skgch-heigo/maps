@@ -1,9 +1,11 @@
+import random
 import sys
 from io import BytesIO
 
 import requests
 from PIL import Image, ImageQt
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
 import finder
 import window
@@ -65,6 +67,14 @@ class Example(QMainWindow, window.Ui_MainWindow):
         self.doubleSpinBox_2.valueChanged.connect(self.getImage)
         self.horizontalSlider.valueChanged.connect(self.getImage)
         self.label.setPixmap(QPixmap.fromImage(self.img))
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_PageUp:
+            self.horizontalSlider.value = min(99, self.horizontalSlider.value + 10)
+            self.getImage()
+        if event.key() == Qt.Key_PageDown:
+            self.horizontalSlider.value = max(1, self.horizontalSlider.value - 10)
+            self.getImage()
 
 
 if __name__ == '__main__':
