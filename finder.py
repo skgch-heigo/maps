@@ -57,6 +57,12 @@ def get_address(town, index):
     return toponym_address[index]["name"]
 
 
+def get_full_addr(address):
+    toponym = geocode(address)
+    toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]
+    return toponym_address["text"]
+
+
 def get_coords(town):
     toponym = geocode(town)
     coords = toponym["Point"]["pos"]

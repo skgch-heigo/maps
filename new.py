@@ -53,6 +53,7 @@ class Example(QMainWindow, window.Ui_MainWindow):
         super().__init__()
         self.tp = "map"
         self.pm = None
+        self.post = False
         self.setupUi(self)
         self.getImage()
         self.initUI()
@@ -77,9 +78,22 @@ class Example(QMainWindow, window.Ui_MainWindow):
         self.label.setPixmap(QPixmap.fromImage(self.img))
         self.pushButton.clicked.connect(self.run)
         self.pushButton_2.clicked.connect(self.clr)
+        self.checkBox.clicked.connect(self.post_ind)
+
+    def post_ind(self):
+        if self.checkBox.isChecked():
+            self.post = True
+            if self.lineEdit_2.text():
+                self.lineEdit_2.setText(self.lineEdit_2.text() + ", " + finder.get_postal_code(self.lineEdit_2.text()))
+        else:
+            self.post = False
 
     def run(self):
         if self.lineEdit.text():
+            addr = finder.get_full_addr(self.lineEdit.text())
+            self.lineEdit_2.setText(addr)
+            if self.post:
+                self.lineEdit_2.setText(self.lineEdit_2.text() + ", " + finder.get_postal_code(self.lineEdit_2.text()))
             ll, span = finder.get_ll_span(self.lineEdit.text())
             coords = tuple(map(float, ll.split(",")))
             span = tuple(map(float, span.split(",")))
@@ -92,6 +106,7 @@ class Example(QMainWindow, window.Ui_MainWindow):
 
     def clr(self):
         self.pm = None
+        self.lineEdit_2.setText("")
         self.getImage()
 
     def change_tp(self):
