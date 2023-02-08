@@ -85,6 +85,8 @@ class Example(QMainWindow, window.Ui_MainWindow):
             if self.lineEdit_2.text():
                 self.lineEdit_2.setText(self.lineEdit_2.text() + ", " + finder.get_postal_code(self.lineEdit_2.text()))
         else:
+            if self.lineEdit_2.text():
+                self.lineEdit_2.setText(", ".join(self.lineEdit_2.text().split(", ")[:-1]))
             self.post = False
 
     def run(self):
