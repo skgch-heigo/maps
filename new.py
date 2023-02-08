@@ -10,19 +10,18 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
 import finder
 import window
 
-
-#toponym_to_find = " ".join(sys.argv[1:])
+# toponym_to_find = " ".join(sys.argv[1:])
 #
-#coords = tuple(finder.get_coords(toponym_to_find))
+# coords = tuple(finder.get_coords(toponym_to_find))
 #
-#orgs = finder.get_org("Аптека", coords, 10)
+# orgs = finder.get_org("Аптека", coords, 10)
 #
 ## inf = {"Расстояние": finder.lonlat_distance(coords, tuple(map(float, org[2].split(",")))),
 ##        "Адрес": org[1], "Название": org[0], "Время работы": org[3]["Hours"]["text"]}
 #
-#ans = [1000, -1000, 1000, -1000]
-#points = []
-#for i in orgs:
+# ans = [1000, -1000, 1000, -1000]
+# points = []
+# for i in orgs:
 #    ans[0] = min(ans[0], float(i[2].split(",")[0]))
 #    ans[1] = max(ans[1], float(i[2].split(",")[0]))
 #    ans[2] = min(ans[2], float(i[2].split(",")[1]))
@@ -36,16 +35,16 @@ import window
 #
 ## ll_span = finder.get_ll_span(org[1])
 #
-#response = finder.get_map(",".join([str((ans[0] + ans[1]) / 2), str((ans[2] + ans[3]) / 2)]),
+# response = finder.get_map(",".join([str((ans[0] + ans[1]) / 2), str((ans[2] + ans[3]) / 2)]),
 #                          ",".join([str((ans[1] - ans[0])), str((ans[3] - ans[2]))]),
 #                          points)
 #
-#map_file = "map.png"
-#with open(map_file, "wb") as file:
+# map_file = "map.png"
+# with open(map_file, "wb") as file:
 #    file.write(response.content)
 
 # Инициализируем pygame
-SCREEN_SIZE = [600, 450]
+SCREEN_SIZE = [650, 450]
 
 
 class Example(QMainWindow, window.Ui_MainWindow):
@@ -98,7 +97,7 @@ class Example(QMainWindow, window.Ui_MainWindow):
             coords = tuple(map(float, ll.split(",")))
             span = tuple(map(float, span.split(",")))
             max_sp = max(span)
-            self.horizontalSlider.setValue(max(min(max_sp * 1000, 500), 1))
+            self.horizontalSlider.setValue(int(max(min(max_sp * 1000, 500), 1)))
             self.pm = [(ll, "pm2bll")]
             self.doubleSpinBox.setValue(coords[0])
             self.doubleSpinBox_2.setValue(coords[1])
@@ -139,6 +138,30 @@ class Example(QMainWindow, window.Ui_MainWindow):
         if event.key() == Qt.Key_Left:
             self.doubleSpinBox.setValue(max(-180, self.doubleSpinBox.value() - self.horizontalSlider.value() / 1000))
             self.getImage()
+
+    def mousePressEvent(self, event):
+        left_x = ((self.label.x() + self.label.width()) // 2 - SCREEN_SIZE[0] // 2)
+        left_y = ((self.label.y() + self.label.height()) // 2 - SCREEN_SIZE[1] // 2)
+        if left_x < event.x() < SCREEN_SIZE[0] + left_x and \
+                left_y < event.y() < SCREEN_SIZE[1] + left_y:
+            x = (event.x() - SCREEN_SIZE[0] // 2 - left_x) / SCREEN_SIZE[0] \
+                * (self.horizontalSlider.value() / 1000) / 450 * 650
+            y = (event.y() - SCREEN_SIZE[1] // 2 - left_y) / SCREEN_SIZE[1] \
+                * (self.horizontalSlider.value() / 1000)
+            if event.button() == Qt.LeftButton:
+                addr = finder.get_full_addr(str(self.doubleSpinBox.value() + x) + "," +
+                                            str(self.doubleSpinBox_2.value() - y))
+                self.lineEdit_2.setText(addr)
+                if self.post:
+                    self.lineEdit_2.setText(
+                        self.lineEdit_2.text() + ", " +
+                        finder.get_postal_code(str(self.doubleSpinBox.value() + x) + "," +
+                                               str(self.doubleSpinBox_2.value() - y)))
+                self.pm = [(str(self.doubleSpinBox.value() + x) + "," +
+                            str(self.doubleSpinBox_2.value() - y), "pm2bll")]
+                self.getImage()
+            elif event.button() == Qt.RightButton:
+                pass
 
 
 def except_hook(cls, exception, traceback):
