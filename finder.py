@@ -60,7 +60,7 @@ def get_address(town, index):
 def get_coords(town):
     toponym = geocode(town)
     coords = toponym["Point"]["pos"]
-    return map(float, coords.split())
+    return tuple(map(float, coords.split()))
 
 
 def get_org(text, where, num):

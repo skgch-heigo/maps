@@ -52,14 +52,15 @@ class Example(QMainWindow, window.Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.tp = "map"
+        self.pm = None
         self.setupUi(self)
         self.getImage()
         self.initUI()
 
     def getImage(self):
         response = finder.get_map(str(self.doubleSpinBox.value()) + "," + str(self.doubleSpinBox_2.value()),
-                                  str(self.horizontalSlider.value() / 100) + "," +
-                                  str(self.horizontalSlider.value() / 100), tp=self.tp)
+                                  str(self.horizontalSlider.value() / 1000) + "," +
+                                  str(self.horizontalSlider.value() / 1000), tp=self.tp, points=self.pm)
         self.img = ImageQt.ImageQt(Image.open(BytesIO(response.content)))
         self.label.setPixmap(QPixmap.fromImage(self.img))
         if not self.hasFocus():
@@ -69,38 +70,59 @@ class Example(QMainWindow, window.Ui_MainWindow):
         self.radioButton.clicked.connect(self.change_tp)
         self.radioButton_2.clicked.connect(self.change_tp)
         self.radioButton_3.clicked.connect(self.change_tp)
+        self.radioButton_4.clicked.connect(self.change_tp)
         self.doubleSpinBox.valueChanged.connect(self.getImage)
         self.doubleSpinBox_2.valueChanged.connect(self.getImage)
         self.horizontalSlider.valueChanged.connect(self.getImage)
         self.label.setPixmap(QPixmap.fromImage(self.img))
+        self.pushButton.clicked.connect(self.run)
+        self.pushButton_2.clicked.connect(self.clr)
+
+    def run(self):
+        if self.lineEdit.text():
+            ll, span = finder.get_ll_span(self.lineEdit.text())
+            coords = tuple(map(float, ll.split(",")))
+            span = tuple(map(float, span.split(",")))
+            max_sp = max(span)
+            self.horizontalSlider.setValue(max(min(max_sp * 1000, 500), 1))
+            self.pm = [(ll, "pm2bll")]
+            self.doubleSpinBox.setValue(coords[0])
+            self.doubleSpinBox_2.setValue(coords[1])
+            self.getImage()
+
+    def clr(self):
+        self.pm = None
+        self.getImage()
 
     def change_tp(self):
         if self.radioButton.isChecked():
             self.tp = "map"
         elif self.radioButton_2.isChecked():
             self.tp = "sat"
-        else:
-            self.tp = "skl"
+        elif self.radioButton_3.isChecked():
+            self.tp = "sat,skl"
+        elif self.radioButton_4.isChecked():
+            self.tp = "map,trf,skl"
         self.getImage()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_PageUp:
-            self.horizontalSlider.setValue(min(99, self.horizontalSlider.value() + 5))
+            self.horizontalSlider.setValue(min(500, self.horizontalSlider.value() + 5))
             self.getImage()
         if event.key() == Qt.Key_PageDown:
             self.horizontalSlider.setValue(max(1, self.horizontalSlider.value() - 5))
             self.getImage()
         if event.key() == Qt.Key_Down:
-            self.doubleSpinBox_2.setValue(max(-90, self.doubleSpinBox_2.value() - self.horizontalSlider.value() / 200))
+            self.doubleSpinBox_2.setValue(max(-90, self.doubleSpinBox_2.value() - self.horizontalSlider.value() / 2000))
             self.getImage()
         if event.key() == Qt.Key_Up:
-            self.doubleSpinBox_2.setValue(min(90, self.doubleSpinBox_2.value() + self.horizontalSlider.value() / 200))
+            self.doubleSpinBox_2.setValue(min(90, self.doubleSpinBox_2.value() + self.horizontalSlider.value() / 2000))
             self.getImage()
         if event.key() == Qt.Key_Right:
-            self.doubleSpinBox.setValue(min(180, self.doubleSpinBox.value() + self.horizontalSlider.value() / 100))
+            self.doubleSpinBox.setValue(min(180, self.doubleSpinBox.value() + self.horizontalSlider.value() / 1000))
             self.getImage()
         if event.key() == Qt.Key_Left:
-            self.doubleSpinBox.setValue(max(-180, self.doubleSpinBox.value() - self.horizontalSlider.value() / 100))
+            self.doubleSpinBox.setValue(max(-180, self.doubleSpinBox.value() - self.horizontalSlider.value() / 1000))
             self.getImage()
 
 
