@@ -51,6 +51,7 @@ SCREEN_SIZE = [600, 450]
 class Example(QMainWindow, window.Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        self.tp = "map"
         self.setupUi(self)
         self.getImage()
         self.initUI()
@@ -58,17 +59,29 @@ class Example(QMainWindow, window.Ui_MainWindow):
     def getImage(self):
         response = finder.get_map(str(self.doubleSpinBox.value()) + "," + str(self.doubleSpinBox_2.value()),
                                   str(self.horizontalSlider.value() / 100) + "," +
-                                  str(self.horizontalSlider.value() / 100))
+                                  str(self.horizontalSlider.value() / 100), tp=self.tp)
         self.img = ImageQt.ImageQt(Image.open(BytesIO(response.content)))
         self.label.setPixmap(QPixmap.fromImage(self.img))
         if not self.hasFocus():
             self.setFocus()
 
     def initUI(self):
+        self.radioButton.clicked.connect(self.change_tp)
+        self.radioButton_2.clicked.connect(self.change_tp)
+        self.radioButton_3.clicked.connect(self.change_tp)
         self.doubleSpinBox.valueChanged.connect(self.getImage)
         self.doubleSpinBox_2.valueChanged.connect(self.getImage)
         self.horizontalSlider.valueChanged.connect(self.getImage)
         self.label.setPixmap(QPixmap.fromImage(self.img))
+
+    def change_tp(self):
+        if self.radioButton.isChecked():
+            self.tp = "map"
+        elif self.radioButton_2.isChecked():
+            self.tp = "sat"
+        else:
+            self.tp = "skl"
+        self.getImage()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_PageUp:
@@ -78,16 +91,16 @@ class Example(QMainWindow, window.Ui_MainWindow):
             self.horizontalSlider.setValue(max(1, self.horizontalSlider.value() - 5))
             self.getImage()
         if event.key() == Qt.Key_Down:
-            self.doubleSpinBox_2.setValue(max(-90, self.doubleSpinBox_2.value() - 1))
+            self.doubleSpinBox_2.setValue(max(-90, self.doubleSpinBox_2.value() - self.horizontalSlider.value() / 200))
             self.getImage()
         if event.key() == Qt.Key_Up:
-            self.doubleSpinBox_2.setValue(min(90, self.doubleSpinBox_2.value() + 1))
+            self.doubleSpinBox_2.setValue(min(90, self.doubleSpinBox_2.value() + self.horizontalSlider.value() / 200))
             self.getImage()
         if event.key() == Qt.Key_Right:
-            self.doubleSpinBox.setValue(min(180, self.doubleSpinBox.value() + 1))
+            self.doubleSpinBox.setValue(min(180, self.doubleSpinBox.value() + self.horizontalSlider.value() / 100))
             self.getImage()
         if event.key() == Qt.Key_Left:
-            self.doubleSpinBox.setValue(max(-180, self.doubleSpinBox.value() - 1))
+            self.doubleSpinBox.setValue(max(-180, self.doubleSpinBox.value() - self.horizontalSlider.value() / 100))
             self.getImage()
 
 

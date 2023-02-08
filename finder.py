@@ -97,12 +97,12 @@ def get_org(text, where, num):
         return answer
 
 
-def get_map(ll, span, points=None):
+def get_map(ll, span, points=None, tp="map"):
     map_params = {
         # позиционируем карту центром на наш исходный адрес
         "ll": ll,
         "spn": span,
-        "l": "map",
+        "l": tp,
         "size": "650,450",
     }
     if points:
