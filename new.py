@@ -45,6 +45,7 @@ import window
 
 # Инициализируем pygame
 SCREEN_SIZE = [650, 450]
+metre50 = 0.000450
 
 
 class Example(QMainWindow, window.Ui_MainWindow):
@@ -168,7 +169,19 @@ class Example(QMainWindow, window.Ui_MainWindow):
                             str(self.doubleSpinBox_2.value() - y), "pm2bll")]
                 self.getImage()
             elif event.button() == Qt.RightButton:
-                pass
+                addr = finder.get_full_addr(str(self.doubleSpinBox.value() + x) + "," +
+                                            str(self.doubleSpinBox_2.value() - y))
+                org = finder.get_org(addr,
+                                     where=(self.doubleSpinBox.value() + x, self.doubleSpinBox_2.value() - y), dist=50)
+                if org:
+                    the_org = org[0]
+                    self.lineEdit_2.setText(the_org[0] + ", " + the_org[1])
+                    if self.post:
+                        self.postal = finder.get_postal_code(the_org[1])
+                        self.lineEdit_2.setText(
+                            self.lineEdit_2.text() + ", " + self.postal)
+                    self.pm = [(the_org[2], "pm2gnl")]
+                    self.getImage()
 
 
 def except_hook(cls, exception, traceback):

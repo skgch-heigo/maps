@@ -69,15 +69,18 @@ def get_coords(town):
     return tuple(map(float, coords.split()))
 
 
-def get_org(text, where, num):
+def get_org(text, where=None, num=1, spn=None, dist=None):
     search_params = {
         "apikey": org_api,
         "text": text,
         "lang": "ru_RU",
-        "ll": ",".join(map(str, where)),
-        "type": "biz"
+        "type": "biz",
+        "results": 500
     }
-
+    if where:
+        search_params["ll"] = ",".join(map(str, where))
+    if spn:
+        search_params["spn"] = spn
     response = requests.get(search_api_server, params=search_params)
     if not response:
         print("Ошибка выполнения запроса:")
@@ -87,10 +90,11 @@ def get_org(text, where, num):
     else:
         json_response = response.json()
         # Получаем первую найденную организацию.
-        orgs = json_response["features"][:num]
+        orgs = json_response["features"]
         answer = []
-        for i in orgs:
-            organization = i
+        i = 0
+        while len(answer) < num and i < len(orgs):
+            organization = orgs[i]
             # Название организации.
             org_name = organization["properties"]["CompanyMetaData"]["name"]
             # Адрес организации.
@@ -98,6 +102,11 @@ def get_org(text, where, num):
 
             # Получаем координаты ответа.
             point = organization["geometry"]["coordinates"]
+            if dist:
+                if lonlat_distance(where, point) > dist:
+                    i += 1
+                    continue
+            i += 1
             org_point = f"{point[0]},{point[1]}"
             answer.append((org_name, org_address, org_point, organization["properties"]["CompanyMetaData"]))
         return answer
