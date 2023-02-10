@@ -53,6 +53,7 @@ class Example(QMainWindow, window.Ui_MainWindow):
         self.tp = "map"
         self.pm = None
         self.post = False
+        self.postal = ""
         self.setupUi(self)
         self.getImage()
         self.initUI()
@@ -83,10 +84,12 @@ class Example(QMainWindow, window.Ui_MainWindow):
         if self.checkBox.isChecked():
             self.post = True
             if self.lineEdit_2.text():
-                self.lineEdit_2.setText(self.lineEdit_2.text() + ", " + finder.get_postal_code(self.lineEdit_2.text()))
+                self.postal = finder.get_postal_code(self.lineEdit_2.text())
+                self.lineEdit_2.setText(self.lineEdit_2.text() + ", " + self.postal)
         else:
             if self.lineEdit_2.text():
-                self.lineEdit_2.setText(", ".join(self.lineEdit_2.text().split(", ")[:-1]))
+                self.lineEdit_2.setText(self.lineEdit_2.text()[:len(self.lineEdit_2.text()) - len(self.postal) - 2])
+            self.postal = ""
             self.post = False
 
     def run(self):
@@ -94,7 +97,8 @@ class Example(QMainWindow, window.Ui_MainWindow):
             addr = finder.get_full_addr(self.lineEdit.text())
             self.lineEdit_2.setText(addr)
             if self.post:
-                self.lineEdit_2.setText(self.lineEdit_2.text() + ", " + finder.get_postal_code(self.lineEdit_2.text()))
+                self.postal = finder.get_postal_code(self.lineEdit_2.text())
+                self.lineEdit_2.setText(self.lineEdit_2.text() + ", " + self.postal)
             ll, span = finder.get_ll_span(self.lineEdit.text())
             coords = tuple(map(float, ll.split(",")))
             span = tuple(map(float, span.split(",")))
@@ -108,6 +112,7 @@ class Example(QMainWindow, window.Ui_MainWindow):
     def clr(self):
         self.pm = None
         self.lineEdit_2.setText("")
+        self.postal = ""
         self.getImage()
 
     def change_tp(self):
@@ -155,10 +160,10 @@ class Example(QMainWindow, window.Ui_MainWindow):
                                             str(self.doubleSpinBox_2.value() - y))
                 self.lineEdit_2.setText(addr)
                 if self.post:
+                    self.postal = finder.get_postal_code(str(self.doubleSpinBox.value() + x) + "," +
+                                                         str(self.doubleSpinBox_2.value() - y))
                     self.lineEdit_2.setText(
-                        self.lineEdit_2.text() + ", " +
-                        finder.get_postal_code(str(self.doubleSpinBox.value() + x) + "," +
-                                               str(self.doubleSpinBox_2.value() - y)))
+                        self.lineEdit_2.text() + ", " + self.postal)
                 self.pm = [(str(self.doubleSpinBox.value() + x) + "," +
                             str(self.doubleSpinBox_2.value() - y), "pm2bll")]
                 self.getImage()

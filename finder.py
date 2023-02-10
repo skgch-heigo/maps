@@ -128,7 +128,10 @@ def get_map(ll, span, points=None, tp="map"):
 def get_postal_code(address):
     toponym = geocode(address)
     toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["Address"]
-    code = toponym_address['postal_code']
+    if 'postal_code' in toponym_address:
+        code = toponym_address['postal_code']
+    else:
+        code = "почтового индекса нет"
     return code
 
 
